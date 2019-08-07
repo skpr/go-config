@@ -1,5 +1,7 @@
 # skprconfig
 
+[![CircleCI](https://circleci.com/gh/skpr/go-skprconfig.svg?style=svg)](https://circleci.com/gh/skpr/go-skprconfig)
+
 This is a go package providing an interface to read config values on the skpr.io platform.
 
 ## Usage
