@@ -1,0 +1,14 @@
+---
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: golang:1.12
+    working_directory: /data
+    steps:
+      - checkout
+      - run: go mod init
+      - run: diff -u <(echo -n) <(gofmt -d -s .)
+      - run: go vet
+      - run: go test -cover
