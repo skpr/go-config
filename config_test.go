@@ -63,3 +63,33 @@ func createVirtualFS() afero.Fs {
 	}
 	return testFS
 }
+
+func TestConfig_dirPath(t *testing.T) {
+	config := Config{
+		Path: "/a",
+	}
+	have := config.dirPath("b/c", "d")
+	want := "/a/b/c/d"
+	assert.Equal(t, want, have, "dir path components are in the right order")
+}
+
+func TestConfig_filePath(t *testing.T) {
+	config := Config{
+		Path: "/1",
+	}
+	have := config.filePath("2", "3", "foo.bar")
+	want := "/1/2/3/foo.bar"
+	assert.Equal(t, want, have, "file path components are in the right order")
+}
+
+func TestConfig_readFile(t *testing.T) {
+	config := Config{
+		FileSystem: createVirtualFS(),
+	}
+	err := afero.WriteFile(config.FileSystem, "/file.txt", []byte("abc123"), 0644)
+	assert.Nil(t, err)
+
+	value, err := config.readFile("/file.txt")
+	assert.Nil(t, err)
+	assert.Equal(t, "abc123", string(value), "file contents match expected")
+}
