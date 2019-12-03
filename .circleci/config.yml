@@ -8,7 +8,7 @@ jobs:
     working_directory: /data
     steps:
       - checkout
-      - run: go mod init
+      - run: go mod vendor
       - run: diff -u <(echo -n) <(gofmt -d -s .)
       - run: go vet
       - run: go test -cover
