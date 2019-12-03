@@ -8,6 +8,7 @@ jobs:
     working_directory: /data
     steps:
       - checkout
+      - run: go get -u golang.org/x/lint
       - run: go mod vendor
       - run: golint -set_exit_status `go list ./... | grep -v /vendor/`
       - run: go vet
