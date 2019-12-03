@@ -9,21 +9,25 @@ This is a go package providing an interface to read config values on the skpr.io
 ```go
 import "github.com/skpr/skprconfig"
 
-config, err := skprconfig.NewConfig().Load()
+// Load the config.
+config, err := skprconfig.Load()
 if err != nil {
   panic("failed to load config")
 }
-bar := config.Get("foo")
+
+// Get a string value.
+bar, ok := config.Get("token")
+if !ok {
+  panic("token config key not found")
+}
+
+// Get an int value.
+wiz, ok := config.GetInt("bang")
 
 // Reload config.
-config, err := config.Load()
+config, err := skprconfig.Load()
 
 // Get the configured value for "port", with a default fallback if missing.
 listenPort := config.GetWithFallback("port", "8888")
 
-// Get the configured value for "token", and return an error if missing.
-token, err := config.Get("token")
-if err != nil {
-  panic("auth token not configured")
-}
 ```
