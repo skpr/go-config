@@ -9,6 +9,6 @@ jobs:
     steps:
       - checkout
       - run: go mod vendor
-      - run: diff -u <(echo -n) <(gofmt -d -s .)
+      - run: golint -set_exit_status `go list ./... | grep -v /vendor/`
       - run: go vet
       - run: go test -cover

@@ -56,7 +56,7 @@ func (c *Config) Get(key string) (string, bool) {
 	return value.(string), ok
 }
 
-// Get returns a boolean value for the key.
+// GetBool returns a boolean value for the key.
 func (c *Config) GetBool(key string) (bool, bool) {
 	value, ok := c.getValue(key)
 	if value == nil {
@@ -65,7 +65,7 @@ func (c *Config) GetBool(key string) (bool, bool) {
 	return value.(bool), ok
 }
 
-// Get returns a int value for the key.
+// GetInt returns a int value for the key.
 func (c *Config) GetInt(key string) (int, bool) {
 	value, ok := c.getValue(key)
 	if value == nil {
@@ -74,7 +74,7 @@ func (c *Config) GetInt(key string) (int, bool) {
 	return int(value.(float64)), ok
 }
 
-// Get returns a float value for the key.
+// GetFloat returns a float value for the key.
 func (c *Config) GetFloat(key string) (float64, bool) {
 	value, ok := c.getValue(key)
 	if value == nil {
