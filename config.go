@@ -18,50 +18,84 @@ type Config struct {
 	data map[string]interface{}
 }
 
-// NewConfig creates a Config struct.
-func NewConfig(options ...func(config *Config)) (*Config, error) {
+// Load loads Config from file.
+func Load(options ...func(config *Config)) (*Config, error) {
 	config := &Config{
 		path: DefaultPath,
 	}
 	for _, option := range options {
 		option(config)
 	}
-	return config.load()
-}
 
-// load the json file to a Config map.
-func (c *Config) load() (*Config, error) {
-
-	if _, err := os.Stat(c.path); os.IsNotExist(err) {
-		return c, errors.Wrap(err, "config file does not exist")
+	if _, err := os.Stat(config.path); os.IsNotExist(err) {
+		return config, errors.Wrap(err, "config file does not exist")
 	}
 
-	data, err := ioutil.ReadFile(c.path)
+	data, err := ioutil.ReadFile(config.path)
 	if err != nil {
-		return c, errors.Wrap(err, "Failed to read config file")
+		return config, errors.Wrap(err, "Failed to read config file")
 	}
 
 	var configData map[string]interface{}
 
 	err = json.Unmarshal(data, &configData)
 	if err != nil {
-		return c, errors.Wrap(err, "Failed to unmarshal config")
+		return config, errors.Wrap(err, "Failed to unmarshal config")
 	}
-	c.data = configData
+	config.data = configData
 
-	return c, nil
+	return config, nil
 }
 
-// Get returns a value for the key.
-func (c *Config) Get(key string) interface{} {
-	return c.GetWithFallback(key, "")
+// Get returns a string value for the key.
+func (c *Config) Get(key string) (string, bool) {
+	value, ok := c.getValue(key)
+	if value == nil {
+		value = ""
+	}
+	return value.(string), ok
+}
+
+// Get returns a boolean value for the key.
+func (c *Config) GetBool(key string) (bool, bool) {
+	value, ok := c.getValue(key)
+	if value == nil {
+		value = false
+	}
+	return value.(bool), ok
+}
+
+// Get returns a int value for the key.
+func (c *Config) GetInt(key string) (int, bool) {
+	value, ok := c.getValue(key)
+	if value == nil {
+		value = 0
+	}
+	return int(value.(float64)), ok
+}
+
+// Get returns a float value for the key.
+func (c *Config) GetFloat(key string) (float64, bool) {
+	value, ok := c.getValue(key)
+	if value == nil {
+		value = 0.0
+	}
+	return value.(float64), ok
+}
+
+func (c *Config) getValue(key string) (interface{}, bool) {
+	if _, ok := c.data[key]; !ok {
+		return nil, false
+	}
+	return c.data[key], true
 }
 
 // GetWithFallback returns the configured value of a given key, and the fallback
 // value if no key does not exist.
-func (c *Config) GetWithFallback(key, fallback string) interface{} {
-	if _, ok := c.data[key]; !ok {
+func (c *Config) GetWithFallback(key, fallback string) string {
+	if _, ok := c.getValue(key); !ok {
 		return fallback
 	}
-	return c.data[key]
+	value, _ := c.getValue(key)
+	return value.(string)
 }
