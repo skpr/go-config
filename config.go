@@ -2,9 +2,10 @@ package skprconfig
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -54,33 +55,6 @@ func (c *Config) Get(key string) (string, bool) {
 		value = ""
 	}
 	return value.(string), ok
-}
-
-// GetBool returns a boolean value for the key.
-func (c *Config) GetBool(key string) (bool, bool) {
-	value, ok := c.getValue(key)
-	if value == nil {
-		value = false
-	}
-	return value.(bool), ok
-}
-
-// GetInt returns a int value for the key.
-func (c *Config) GetInt(key string) (int, bool) {
-	value, ok := c.getValue(key)
-	if value == nil {
-		value = 0
-	}
-	return int(value.(float64)), ok
-}
-
-// GetFloat returns a float value for the key.
-func (c *Config) GetFloat(key string) (float64, bool) {
-	value, ok := c.getValue(key)
-	if value == nil {
-		value = 0.0
-	}
-	return value.(float64), ok
 }
 
 func (c *Config) getValue(key string) (interface{}, bool) {

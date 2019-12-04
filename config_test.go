@@ -2,6 +2,7 @@ package skprconfig
 
 import (
 	"github.com/stretchr/testify/assert"
+
 	"testing"
 )
 
@@ -17,11 +18,6 @@ func TestConfigGet(t *testing.T) {
 	value, ok := config.Get("chip.shop")
 	assert.True(t, ok)
 	assert.Equal(t, "snax", value)
-
-	// Assert int.
-	intValue, ok := config.GetInt("foo.bar")
-	assert.True(t, ok)
-	assert.Equal(t, 123, intValue)
 
 	// Assert nil value.
 	value, ok = config.Get("somewhat.secret")

@@ -1,6 +1,6 @@
 {
   "chip.shop": "snax",
-  "foo.bar": 123,
+  "foo.bar": "wiz",
   "somewhat.secret": null,
   "super.secret": "sssh"
 }
