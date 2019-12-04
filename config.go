@@ -2,10 +2,9 @@ package skprconfig
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -29,19 +28,19 @@ func Load(options ...func(config *Config)) (*Config, error) {
 	}
 
 	if _, err := os.Stat(config.path); os.IsNotExist(err) {
-		return config, errors.Wrap(err, "config file does not exist")
+		return config, fmt.Errorf("config file does not exist: %w", err)
 	}
 
 	data, err := ioutil.ReadFile(config.path)
 	if err != nil {
-		return config, errors.Wrap(err, "failed to read config file")
+		return config, fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	var configData map[string]interface{}
 
 	err = json.Unmarshal(data, &configData)
 	if err != nil {
-		return config, errors.Wrap(err, "failed to unmarshal config")
+		return config, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 	config.data = configData
 
