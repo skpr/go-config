@@ -1,121 +1,75 @@
 package skprconfig
 
 import (
-	"fmt"
+	"encoding/json"
 	"io/ioutil"
 	"os"
-	"strings"
 
-	"github.com/spf13/afero"
+	"github.com/pkg/errors"
 )
 
 const (
-	// DefaultPath is the default directory used to mount config and secrets into containers.
-	DefaultPath string = "/etc/skpr"
-	// DefaultTrimSuffix is the default pattern to trim from values.
-	DefaultTrimSuffix string = "\n"
-	// PathPartConfig is the path component where config values are mounted.
-	PathPartConfig string = "config"
-	// PathPartSecret is the path component where secret values are mounted.
-	PathPartSecret string = "secret"
-	// PathPartDefault is the path component where system-defined values are mounted.
-	PathPartDefault string = "default"
-	// PathPartOverride is the path component where user-defined values are mounted.
-	PathPartOverride string = "override"
+	// DefaultPath is the default file path used to mount config.
+	DefaultPath string = "/etc/skpr/data/config.json"
 )
 
-// Get returns the configured value of a given key, and the fallback value if no
-// key does not exist.
-//
-// This is a convenience if the default skpr config mount point is being used.
-func Get(key, fallback string) string {
-	c := NewConfig(DefaultPath)
-	return c.GetWithFallback(key, fallback)
-}
-
-// Config holds parameters for config.
+// Config represents the config.
 type Config struct {
-	Path       string
-	TrimSuffix string
-	FileSystem afero.Fs
+	path string
+	data map[string]interface{}
 }
 
-// NewConfig returns a new Config struct with a given set of parameters.
-func NewConfig(path string) *Config {
-	fs := afero.NewOsFs()
-	return &Config{
-		Path:       path,
-		TrimSuffix: DefaultTrimSuffix,
-		FileSystem: fs,
+// Load loads Config from file.
+func Load(options ...func(config *Config)) (*Config, error) {
+	config := &Config{
+		path: DefaultPath,
 	}
+	for _, option := range options {
+		option(config)
+	}
+
+	if _, err := os.Stat(config.path); os.IsNotExist(err) {
+		return config, errors.Wrap(err, "config file does not exist")
+	}
+
+	data, err := ioutil.ReadFile(config.path)
+	if err != nil {
+		return config, errors.Wrap(err, "failed to read config file")
+	}
+
+	var configData map[string]interface{}
+
+	err = json.Unmarshal(data, &configData)
+	if err != nil {
+		return config, errors.Wrap(err, "failed to unmarshal config")
+	}
+	config.data = configData
+
+	return config, nil
+}
+
+// Get returns a string value for the key.
+func (c *Config) Get(key string) (string, bool) {
+	value, ok := c.getValue(key)
+	if value == nil {
+		value = ""
+	}
+	return value.(string), ok
+}
+
+func (c *Config) getValue(key string) (interface{}, bool) {
+	if _, ok := c.data[key]; !ok {
+		return nil, false
+	}
+	return c.data[key], true
 }
 
 // GetWithFallback returns the configured value of a given key, and the fallback
 // value if no key does not exist.
 func (c *Config) GetWithFallback(key, fallback string) string {
-	value, err := c.Get(key)
-	if err != nil {
+	if _, ok := c.getValue(key); !ok {
 		return fallback
 	}
-
-	return value
-}
-
-// Get returns the configured value of a given key.
-func (c *Config) Get(key string) (string, error) {
-	var value string
-
-	// These directories are weighted in order of precedence. Values specified
-	// in multiple paths will be overridden by directories further the list.
-	//
-	// @see https://github.com/skpr/docs/blob/master/docs/config.md#deep-dive
-	paths := []string{
-		c.filePath(PathPartConfig, PathPartDefault, key),
-		c.filePath(PathPartSecret, PathPartDefault, key),
-		c.filePath(PathPartConfig, PathPartOverride, key),
-		c.filePath(PathPartSecret, PathPartOverride, key),
-	}
-
-	configNoExist := true
-	for _, file := range paths {
-		if _, err := c.FileSystem.Stat(file); os.IsNotExist(err) {
-			continue
-		}
-		contents, err := c.readFile(file)
-		if err != nil {
-			// This could indicate permissions issues with the mount, so exit.
-			return "", err
-		}
-		configNoExist = false
-		value = string(contents)
-	}
-
-	if configNoExist {
-		err := fmt.Errorf("key not found")
-		return "", err
-	}
-
-	return strings.TrimSuffix(value, DefaultTrimSuffix), nil
-}
-
-// dirPath returns the directory path of a specific config type and
-// system/user provided value.
-func (c *Config) dirPath(configType, defaultOrOverride string) string {
-	return fmt.Sprintf("%s/%s/%s", c.Path, configType, defaultOrOverride)
-}
-
-// filePath returns the file path of a specific config type, system/user
-// provided value, and key.
-func (c *Config) filePath(configType, defaultOrOverride, key string) string {
-	return fmt.Sprintf("%s/%s", c.dirPath(configType, defaultOrOverride), key)
-}
-
-// readFile adapted from io/ioutil.ReadFile() to use injected filesystem.
-func (c *Config) readFile(filename string) ([]byte, error) {
-	f, err := c.FileSystem.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return ioutil.ReadAll(f)
+	value, _ := c.getValue(key)
+	return value.(string)
 }

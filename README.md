@@ -1,20 +1,33 @@
 # skprconfig
 
-[![CircleCI](https://circleci.com/gh/skpr/go-skprconfig.svg?style=svg)](https://circleci.com/gh/skpr/go-skprconfig)
+[![CircleCI](https://circleci.com/gh/skpr/go-config.svg?style=svg)](https://circleci.com/gh/skpr/go-config)
 
 This is a go package providing an interface to read config values on the skpr.io platform.
 
 ## Usage
 
 ```go
-import "github.com/skpr/go-skprconfig"
+import "github.com/skpr/skprconfig"
+
+// Load the config.
+config, err := skprconfig.Load()
+if err != nil {
+  panic("failed to load config")
+}
+
+// Get a string value.
+bar, ok := config.Get("token")
+if !ok {
+  panic("token config key not found")
+}
+
+// Get an int value.
+wiz, ok := config.GetInt("bang")
+
+// Reload config.
+config, err := skprconfig.Load()
 
 // Get the configured value for "port", with a default fallback if missing.
-listenPort := skprconfig.GetWithFallback("port", "8888")
+listenPort := config.GetWithFallback("port", "8888")
 
-// Get the configured value for "token", and return an error if missing.
-token, err := skprconfig.Get("token")
-if err != nil {
-  panic("auth token not configured")
-}
 ```
