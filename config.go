@@ -33,14 +33,14 @@ func Load(options ...func(config *Config)) (*Config, error) {
 
 	data, err := ioutil.ReadFile(config.path)
 	if err != nil {
-		return config, errors.Wrap(err, "Failed to read config file")
+		return config, errors.Wrap(err, "failed to read config file")
 	}
 
 	var configData map[string]interface{}
 
 	err = json.Unmarshal(data, &configData)
 	if err != nil {
-		return config, errors.Wrap(err, "Failed to unmarshal config")
+		return config, errors.Wrap(err, "failed to unmarshal config")
 	}
 	config.data = configData
 
