@@ -21,12 +21,6 @@ if !ok {
   panic("token config key not found")
 }
 
-// Get an int value.
-wiz, ok := config.GetInt("bang")
-
-// Reload config.
-config, err := skprconfig.Load()
-
 // Get the configured value for "port", with a default fallback if missing.
 listenPort := config.GetWithFallback("port", "8888")
 
