@@ -1,0 +1,39 @@
+name: 🧪 Quality
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v7
+
+      - name: 📦 Install Mise
+        uses: jdx/mise-action@v5
+
+      - name: 🧪 Lint
+        run: mise run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v7
+
+      - name: 📦 Install Mise
+        uses: jdx/mise-action@v5
+
+      - name: 🧪 Test
+        run: mise run test

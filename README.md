@@ -1,13 +1,13 @@
-# skprconfig
-
-[![CircleCI](https://circleci.com/gh/skpr/go-config.svg?style=svg)](https://circleci.com/gh/skpr/go-config)
+# go-config
 
 This is a go package providing an interface to read config values on the skpr.io platform.
 
 ## Usage
 
 ```go
-import "github.com/skpr/skprconfig"
+import (
+    skprconfig github.com/skpr/go-config"
+)
 
 // Load the config.
 config, err := skprconfig.Load()
