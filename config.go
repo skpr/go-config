@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
@@ -37,7 +36,7 @@ func Load(options ...func(config *Config)) (*Config, error) {
 		return config, ErrNotFound
 	}
 
-	data, err := ioutil.ReadFile(config.path)
+	data, err := os.ReadFile(config.path)
 	if err != nil {
 		return config, fmt.Errorf("failed to read config file: %w", err)
 	}
