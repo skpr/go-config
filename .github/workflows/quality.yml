@@ -1,4 +1,4 @@
-name: 🧪 Lint
+name: 🧪 Quality
 
 on:
   push:
@@ -25,3 +25,15 @@ jobs:
 
       - name: 🧪 Lint
         run: mise run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v7
+
+      - name: 📦 Install Mise
+        uses: jdx/mise-action@v5
+
+      - name: 🧪 Test
+        run: mise run test
